@@ -3,8 +3,8 @@ import string
 import hashlib
 import requests
 
-#this will change when I actually know it
-API_HOST = "https://www.example.com/"
+#Local IP of RemoteBoot device
+API_HOST = "http://192.168.1.108/"
 
 #known endpoints
 ENDPOINT_CHALLENGE = "api/auth/challenge.php"
@@ -23,15 +23,14 @@ class Client(object):
     password = None
 
     def __init__(self, password):
-        if self.password:
-            self.password = password
-            self._set_session()
+        self.password = password
+        self._set_session()
 
     def press_button(self, button_id, time):
         return self.send_command(ENDPOINT_BUTTON, {"button_id": button_id, "time": time})
 
     def read_leds(self):
-        response = self.session.get(ENDPOINT_LED)
+        response = self.session.get(API_HOST+ENDPOINT_LED)
         if response.status_code == 200:  #valid response
             return {"success": True, "data": response.json()}
         return {"success": False}
@@ -46,13 +45,11 @@ class Client(object):
                 if len(server_chal) == 64:  #32 bytes = 64 hex chars
                     client_chal = self._gen_client_chal()
                     computed_chal = self._calc_sha_256(server_chal + client_chal + self._calc_sha_256(self.password))
-
                     get_data = {"r": computed_chal, "rs": sequence, "c": client_chal}
                     if args is not None and isinstance(args, dict):
                         get_data.update(args)
 
-                    response = self.session.get(self._build_url(endpoint), get_data)
-
+                    response = self.session.get(self._build_url(endpoint), params=get_data)
                     if response.status_code == 200: #valid challenge submission
                         response_json = response.json()
                         if response_json.has_key("r"):  #valid server challenge string received
