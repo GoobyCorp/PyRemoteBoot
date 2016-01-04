@@ -1,5 +1,5 @@
+import os
 import string
-import random
 import hashlib
 import requests
 
@@ -20,6 +20,7 @@ BUTTON_RESET = 1
 
 class Client(object):
     session = None
+    password = None
 
     def __init__(self, password):
         if self.password:
@@ -73,8 +74,7 @@ class Client(object):
     def _gen_client_chal(self):
         client_chal_str = ""
         keyspace = string.ascii_letters + string.digits
-        for x in range(0, 32):
-            client_chal_str += keyspace[random.randrange(0, len(keyspace))]
+        client_chal_str += os.urandom(64)  #random byte string of 64 chars length
         return client_chal_str
 
     def _build_url(self, endpoint):
