@@ -43,23 +43,24 @@ class Client(object):
             if response_json.has_key("challenge") and response_json.has_key("sequence"):
                 sequence = int(response_json["sequence"])
                 server_chal = response_json["challenge"]
-                client_chal = self._gen_client_chal()
-                computed_chal = self._calc_sha_256(server_chal + client_chal + self._calc_sha_256(self.password))
+                if len(server_chal) == 64:  #32 bytes = 64 hex chars
+                    client_chal = self._gen_client_chal()
+                    computed_chal = self._calc_sha_256(server_chal + client_chal + self._calc_sha_256(self.password))
 
-                get_data = {"r": computed_chal, "rs": sequence, "c": client_chal}
-                if args is not None and isinstance(args, dict):
-                    get_data.update(args)
+                    get_data = {"r": computed_chal, "rs": sequence, "c": client_chal}
+                    if args is not None and isinstance(args, dict):
+                        get_data.update(args)
 
-                response = self.session.get(self._build_url(endpoint), get_data)
+                    response = self.session.get(self._build_url(endpoint), get_data)
 
-                if response.status_code == 200: #valid challenge submission
-                    response_json = response.json()
-                    if response_json.has_key("r"):  #valid server challenge string received
-                        server_r = response_json["r"]
-                        if server_r == self._calc_sha_256(client_chal + server_chal + self._calc_sha_256(self.password)):  #server responded correctly
-                            del(response_json["r"])  #remove server challenge response from the response as we don't need it anymore
-                            self._set_session()  #reset session to remove anything cached in it
-                            return {"success": True, "data": response_json}
+                    if response.status_code == 200: #valid challenge submission
+                        response_json = response.json()
+                        if response_json.has_key("r"):  #valid server challenge string received
+                            server_r = response_json["r"]
+                            if server_r == self._calc_sha_256(client_chal + server_chal + self._calc_sha_256(self.password)):  #server responded correctly
+                                del(response_json["r"])  #remove server challenge response from the response as we don't need it anymore
+                                self._set_session()  #reset session to remove anything cached in it
+                                return {"success": True, "data": response_json}
         return {"success": False}
 
     def _set_session(self):
@@ -72,7 +73,7 @@ class Client(object):
         return hashlib.sha256(s).hexdigest()
 
     def _gen_client_chal(self):
-        return os.urandom(64).encode("hex")  #random byte string encoded as hex of 64 chars length
+        return os.urandom(32).encode("hex")  #random byte string encoded as hex of 64 chars length
 
     def _build_url(self, endpoint):
         return API_HOST + endpoint
