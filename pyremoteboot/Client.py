@@ -30,7 +30,7 @@ class Client(object):
         return self.send_command(ENDPOINT_BUTTON, {"button_id": button_id, "time": time})
 
     def read_leds(self):
-        response = self.session.get(API_HOST+ENDPOINT_LED)
+        response = self.session.get(API_HOST + ENDPOINT_LED)
         if response.status_code == 200:  #valid response
             return {"success": True, "data": response.json()}
         return {"success": False}
@@ -48,7 +48,6 @@ class Client(object):
                     get_data = {"r": computed_chal, "rs": sequence, "c": client_chal}
                     if args is not None and isinstance(args, dict):
                         get_data.update(args)
-
                     response = self.session.get(self._build_url(endpoint), params=get_data)
                     if response.status_code == 200: #valid challenge submission
                         response_json = response.json()
