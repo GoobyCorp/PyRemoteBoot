@@ -72,7 +72,7 @@ class Client(object):
         return hashlib.sha256(s).hexdigest()
 
     def _gen_client_chal(self):
-        return os.urandom(64)  #random byte string of 64 chars length
+        return os.urandom(64).encode("hex")  #random byte string encoded as hex of 64 chars length
 
     def _build_url(self, endpoint):
         return API_HOST + endpoint
