@@ -1,5 +1,4 @@
 import os
-import string
 import hashlib
 import requests
 
