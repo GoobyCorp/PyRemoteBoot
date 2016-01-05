@@ -26,15 +26,20 @@ class Client(object):
         self._set_session()
 
     def press_button(self, button_id, time):
-        return self.send_command(ENDPOINT_BUTTON, {"button_id": button_id, "time": time})
+        if isinstance(button_id, int) and isinstance(time, int):
+            return self._auth_command(ENDPOINT_BUTTON, {"button_id": button_id, "time": time})
+        return {"success": False}
 
     def read_leds(self):
-        response = self.session.get(API_HOST + ENDPOINT_LED)
-        if response.status_code == 200:  #valid response
+        return self._unauth_command(ENDPOINT_LED)
+
+    def _unauth_command(self, endpoint):
+        response = self.session.get(self._build_url(endpoint))
+        if response.status_code == 200:
             return {"success": True, "data": response.json()}
         return {"success": False}
 
-    def send_command(self, endpoint, args = None):
+    def _auth_command(self, endpoint, args = None):
         response = self.session.get(self._build_url(ENDPOINT_CHALLENGE))
         if response.status_code == 200:  #valid request
             response_json = response.json()
