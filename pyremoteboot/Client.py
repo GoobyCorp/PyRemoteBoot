@@ -22,14 +22,6 @@ BUTTON_RESET = 1
 
 class Utils(object):
     @staticmethod
-    def is_valid_json(s):
-        try:
-            json.loads(s)
-            return True
-        except:
-            return False
-
-    @staticmethod
     def sha_256(s):
         return hashlib.sha256(s).hexdigest()
 
@@ -65,7 +57,7 @@ class Client(object):
 
     def press_button(self, button_id, time):
         if isinstance(button_id, int) and isinstance(time, int):
-            return self._auth_command(ENDPOINT_BUTTON, json.dumps({"button_id": button_id, "time": time}))
+            return self._auth_command(ENDPOINT_BUTTON, {"button_id": button_id, "time": time})
         return {"success": False}
 
     def read_leds(self):
@@ -88,9 +80,10 @@ class Client(object):
                     client_chal = Utils.gen_client_chal()
                     computed_chal = Utils.sha_256(server_chal + client_chal + self.password)
                     get_data = {"r": computed_chal, "rs": sequence, "c": client_chal}
-                    if isinstance(json_payload, str) and Utils.is_valid_json(json_payload):
+                    if isinstance(json_payload, dict):
+                        json_payload_str = json.dumps(json_payload)
                         cipher = Crypt(self.password, client_chal.decode("hex"))  #sha256 password = key and client_chal = non-hex client challenge
-                        payload = cipher.encrypt(json_payload)
+                        payload = cipher.encrypt(json_payload_str)
                         get_data["l"] = len(payload)
                         get_data["p"] = payload
                     response = self.session.get(self._build_url(endpoint), params=get_data)
