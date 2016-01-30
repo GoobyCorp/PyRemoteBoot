@@ -20,10 +20,6 @@ BUTTON_RESET = 1
 
 class Utils(object):
     @staticmethod
-    def is_ip_address(s):
-        return re.match(r"(?:\d{1,3}\.){3}\d{1,3}/\d{1,2}", s)
-
-    @staticmethod
     def sha_256(s):
         return hashlib.sha256(s).hexdigest()
 
