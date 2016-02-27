@@ -1,4 +1,3 @@
-import re
 import os
 import json
 import hashlib
@@ -12,7 +11,7 @@ ENDPOINT_BUTTON = "api/button/press.php"
 ENDPOINT_LED = "api/led/state.php"
 
 #user agent for identifying what's making the request
-USER_AGENT = "PyRemoteBoot v1.0"
+USER_AGENT = "PyRemoteBoot v2.0"
 
 #button id's
 BUTTON_POWER = 0
