@@ -29,7 +29,7 @@ class Utils(object):
 class Crypt(object):
     def __init__(self, key, iv):
         if len(key) == 32 and len(iv) == 16:
-            self.key = Utils.sha_256(key)
+            self.key = key
             self.iv = iv
         else:
             raise Exception("Key should be 32 bytes and iv should be 16 bytes.")
@@ -79,8 +79,8 @@ class Client(object):
                     if isinstance(json_payload, dict):
                         json_payload_str = json.dumps(json_payload)
                         cipher = Crypt(self.password.decode("hex"), server_chal[:32].decode("hex"))  #raw sha256'd password (32) and raw server challenge (16)
-                        payload = cipher.encrypt(json_payload_str)
-                        get_data["l"] = len(payload)
+                        payload = cipher.encrypt(json_payload_str).encode("hex")
+                        get_data["l"] = len(json_payload_str)
                         get_data["p"] = payload
                     response = self.session.get(self._build_url(endpoint), params=get_data)
                     if response.status_code == 200:
